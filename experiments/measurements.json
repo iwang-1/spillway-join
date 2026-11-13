@@ -10,114 +10,114 @@
       "engine": "spillway-256",
       "trials": [
         {
-          "seconds": 1.2221,
-          "peak_rss_bytes": 2588672
+          "seconds": 0.4935,
+          "peak_rss_bytes": 2441216
         },
         {
-          "seconds": 1.2269,
-          "peak_rss_bytes": 2473984
+          "seconds": 0.4683,
+          "peak_rss_bytes": 2408448
         },
         {
-          "seconds": 1.2461,
-          "peak_rss_bytes": 2588672
+          "seconds": 0.4033,
+          "peak_rss_bytes": 2424832
         }
       ],
-      "median_seconds": 1.2269
+      "median_seconds": 0.4683
     },
     {
       "workload": "uniform",
       "engine": "spillway-4096",
       "trials": [
         {
-          "seconds": 0.0994,
-          "peak_rss_bytes": 2441216
+          "seconds": 0.0502,
+          "peak_rss_bytes": 2342912
         },
         {
-          "seconds": 0.1162,
-          "peak_rss_bytes": 2490368
+          "seconds": 0.0611,
+          "peak_rss_bytes": 2342912
         },
         {
-          "seconds": 0.1144,
-          "peak_rss_bytes": 2375680
+          "seconds": 0.0528,
+          "peak_rss_bytes": 2293760
         }
       ],
-      "median_seconds": 0.1144
+      "median_seconds": 0.0528
     },
     {
       "workload": "uniform",
       "engine": "sqlite-python",
       "trials": [
         {
-          "seconds": 0.2371,
+          "seconds": 0.2425,
+          "peak_rss_bytes": 28590080
+        },
+        {
+          "seconds": 0.2446,
           "peak_rss_bytes": 28622848
         },
         {
-          "seconds": 0.2403,
-          "peak_rss_bytes": 28540928
-        },
-        {
-          "seconds": 0.2407,
-          "peak_rss_bytes": 28590080
+          "seconds": 0.2428,
+          "peak_rss_bytes": 28557312
         }
       ],
-      "median_seconds": 0.2403
+      "median_seconds": 0.2428
     },
     {
       "workload": "hot-key",
       "engine": "spillway-256",
       "trials": [
         {
-          "seconds": 1.2649,
-          "peak_rss_bytes": 2473984
+          "seconds": 0.4326,
+          "peak_rss_bytes": 2424832
         },
         {
-          "seconds": 1.2276,
-          "peak_rss_bytes": 2605056
+          "seconds": 0.4651,
+          "peak_rss_bytes": 2408448
         },
         {
-          "seconds": 1.1696,
-          "peak_rss_bytes": 2588672
+          "seconds": 0.4767,
+          "peak_rss_bytes": 2408448
         }
       ],
-      "median_seconds": 1.2276
+      "median_seconds": 0.4651
     },
     {
       "workload": "hot-key",
       "engine": "spillway-4096",
       "trials": [
         {
-          "seconds": 0.1768,
+          "seconds": 0.0872,
+          "peak_rss_bytes": 2375680
+        },
+        {
+          "seconds": 0.0988,
           "peak_rss_bytes": 2392064
         },
         {
-          "seconds": 0.1326,
+          "seconds": 0.0825,
           "peak_rss_bytes": 2392064
-        },
-        {
-          "seconds": 0.1388,
-          "peak_rss_bytes": 2490368
         }
       ],
-      "median_seconds": 0.1388
+      "median_seconds": 0.0872
     },
     {
       "workload": "hot-key",
       "engine": "sqlite-python",
       "trials": [
         {
-          "seconds": 0.553,
-          "peak_rss_bytes": 28491776
+          "seconds": 0.5728,
+          "peak_rss_bytes": 28524544
         },
         {
-          "seconds": 0.5632,
-          "peak_rss_bytes": 28573696
+          "seconds": 0.5688,
+          "peak_rss_bytes": 28590080
         },
         {
-          "seconds": 0.547,
-          "peak_rss_bytes": 28622848
+          "seconds": 0.6012,
+          "peak_rss_bytes": 28540928
         }
       ],
-      "median_seconds": 0.553
+      "median_seconds": 0.5728
     }
   ]
 }

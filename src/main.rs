@@ -79,28 +79,34 @@ fn ingest(input: &Path, dest: &Path) -> io::Result<u64> {
 }
 
 // SplitMix64 finalizer; vary the key mix by recursion level.
-fn partition(key: i64, depth: usize) -> usize {
+fn partition(key: i64, depth: usize, fanout: usize) -> usize {
     let mut x = (key as u64).wrapping_add((depth as u64 + 1).wrapping_mul(0x9e3779b97f4a7c15));
     x = (x ^ (x >> 30)).wrapping_mul(0xbf58476d1ce4e5b9);
     x = (x ^ (x >> 27)).wrapping_mul(0x94d049bb133111eb);
-    ((x ^ (x >> 31)) as usize) % FANOUT
+    ((x ^ (x >> 31)) as usize) % fanout
 }
 
 struct Part {
     path: PathBuf,
     rows: u64,
 }
-fn split(part: &Part, dir: &Path, depth: usize, side: &str) -> io::Result<Vec<Part>> {
+fn split(
+    part: &Part,
+    dir: &Path,
+    depth: usize,
+    fanout: usize,
+    side: &str,
+) -> io::Result<Vec<Part>> {
     let mut parts = Vec::new();
     let mut writers = Vec::new();
-    for i in 0..FANOUT {
+    for i in 0..fanout {
         let path = dir.join(format!("{side}-{i}"));
         writers.push(BufWriter::with_capacity(BUFFER, File::create(&path)?));
         parts.push(Part { path, rows: 0 });
     }
     let mut input = BufReader::new(File::open(&part.path)?);
     while let Some(row) = next_row(&mut input)? {
-        let index = partition(row.0, depth);
+        let index = partition(row.0, depth, fanout);
         pack(&mut writers[index], row)?;
         parts[index].rows += 1;
     }
@@ -179,8 +185,14 @@ impl<W: Write> Engine<W> {
             return self.blocks(small, large, swapped);
         }
         let children = Scratch::new(dir)?;
-        let l = split(left, &children.0, depth, "l")?;
-        let r = split(right, &children.0, depth, "r")?;
+        // Aim for half-full leaves so modest bucket imbalance rarely forces a second pass.
+        let fanout = small
+            .rows
+            .div_ceil(self.limit as u64)
+            .saturating_mul(2)
+            .clamp(2, FANOUT as u64) as usize;
+        let l = split(left, &children.0, depth, fanout, "l")?;
+        let r = split(right, &children.0, depth, fanout, "r")?;
         self.stats.split_passes += 1;
         self.stats.spill_bytes += (left.rows + right.rows) * 16;
         for (a, b) in l.iter().zip(&r) {

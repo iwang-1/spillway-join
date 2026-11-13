@@ -1,0 +1,123 @@
+{
+  "os": "Darwin",
+  "architecture": "arm64",
+  "python": "3.13.3",
+  "sqlite": "3.50.0",
+  "rows_per_input": 100000,
+  "runs": [
+    {
+      "workload": "uniform",
+      "engine": "spillway-256",
+      "trials": [
+        {
+          "seconds": 1.2221,
+          "peak_rss_bytes": 2588672
+        },
+        {
+          "seconds": 1.2269,
+          "peak_rss_bytes": 2473984
+        },
+        {
+          "seconds": 1.2461,
+          "peak_rss_bytes": 2588672
+        }
+      ],
+      "median_seconds": 1.2269
+    },
+    {
+      "workload": "uniform",
+      "engine": "spillway-4096",
+      "trials": [
+        {
+          "seconds": 0.0994,
+          "peak_rss_bytes": 2441216
+        },
+        {
+          "seconds": 0.1162,
+          "peak_rss_bytes": 2490368
+        },
+        {
+          "seconds": 0.1144,
+          "peak_rss_bytes": 2375680
+        }
+      ],
+      "median_seconds": 0.1144
+    },
+    {
+      "workload": "uniform",
+      "engine": "sqlite-python",
+      "trials": [
+        {
+          "seconds": 0.2371,
+          "peak_rss_bytes": 28622848
+        },
+        {
+          "seconds": 0.2403,
+          "peak_rss_bytes": 28540928
+        },
+        {
+          "seconds": 0.2407,
+          "peak_rss_bytes": 28590080
+        }
+      ],
+      "median_seconds": 0.2403
+    },
+    {
+      "workload": "hot-key",
+      "engine": "spillway-256",
+      "trials": [
+        {
+          "seconds": 1.2649,
+          "peak_rss_bytes": 2473984
+        },
+        {
+          "seconds": 1.2276,
+          "peak_rss_bytes": 2605056
+        },
+        {
+          "seconds": 1.1696,
+          "peak_rss_bytes": 2588672
+        }
+      ],
+      "median_seconds": 1.2276
+    },
+    {
+      "workload": "hot-key",
+      "engine": "spillway-4096",
+      "trials": [
+        {
+          "seconds": 0.1768,
+          "peak_rss_bytes": 2392064
+        },
+        {
+          "seconds": 0.1326,
+          "peak_rss_bytes": 2392064
+        },
+        {
+          "seconds": 0.1388,
+          "peak_rss_bytes": 2490368
+        }
+      ],
+      "median_seconds": 0.1388
+    },
+    {
+      "workload": "hot-key",
+      "engine": "sqlite-python",
+      "trials": [
+        {
+          "seconds": 0.553,
+          "peak_rss_bytes": 28491776
+        },
+        {
+          "seconds": 0.5632,
+          "peak_rss_bytes": 28573696
+        },
+        {
+          "seconds": 0.547,
+          "peak_rss_bytes": 28622848
+        }
+      ],
+      "median_seconds": 0.553
+    }
+  ]
+}
