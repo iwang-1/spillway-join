@@ -1,0 +1,50 @@
+[
+  {
+    "workload": "uniform",
+    "budget": 256,
+    "left_rows": 100000,
+    "right_rows": 100000,
+    "output_rows": 49943,
+    "peak_build_rows": 43,
+    "partition_passes": 273,
+    "fallback_pairs": 0,
+    "partition_bytes_written": 9600000,
+    "probe_rows_scanned": 111385
+  },
+  {
+    "workload": "uniform",
+    "budget": 4096,
+    "left_rows": 100000,
+    "right_rows": 100000,
+    "output_rows": 49943,
+    "peak_build_rows": 436,
+    "partition_passes": 17,
+    "fallback_pairs": 0,
+    "partition_bytes_written": 6400000,
+    "probe_rows_scanned": 102925
+  },
+  {
+    "workload": "hot-key",
+    "budget": 256,
+    "left_rows": 100000,
+    "right_rows": 100000,
+    "output_rows": 689228,
+    "peak_build_rows": 256,
+    "partition_passes": 273,
+    "fallback_pairs": 1,
+    "partition_bytes_written": 9600000,
+    "probe_rows_scanned": 113799
+  },
+  {
+    "workload": "hot-key",
+    "budget": 4096,
+    "left_rows": 100000,
+    "right_rows": 100000,
+    "output_rows": 689228,
+    "peak_build_rows": 1166,
+    "partition_passes": 17,
+    "fallback_pairs": 0,
+    "partition_bytes_written": 6400000,
+    "probe_rows_scanned": 102893
+  }
+]
