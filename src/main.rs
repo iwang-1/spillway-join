@@ -126,7 +126,7 @@ struct Stats {
     probe_rows: u64,
 }
 struct Engine<W: Write> {
-    out: W,
+    out: Option<W>,
     limit: usize,
     stats: Stats,
 }
@@ -152,10 +152,17 @@ impl<W: Write> Engine<W> {
             while let Some((key, v)) = next_row(&mut input)? {
                 self.stats.probe_rows += 1;
                 let begin = block.partition_point(|r| r.0 < key);
-                for &(_, u) in block[begin..].iter().take_while(|r| r.0 == key) {
-                    let (left, right) = if swapped { (v, u) } else { (u, v) };
-                    writeln!(self.out, "{key}\t{left}\t{right}")?;
-                    self.stats.output += 1;
+                let end = block.partition_point(|r| r.0 <= key);
+                self.stats.output = self
+                    .stats
+                    .output
+                    .checked_add((end - begin) as u64)
+                    .ok_or_else(|| invalid("join cardinality exceeds u64"))?;
+                if let Some(out) = self.out.as_mut() {
+                    for &(_, u) in &block[begin..end] {
+                        let (left, right) = if swapped { (v, u) } else { (u, v) };
+                        writeln!(out, "{key}\t{left}\t{right}")?;
+                    }
                 }
             }
         }
@@ -210,16 +217,18 @@ impl<W: Write> Engine<W> {
     }
 }
 
-fn run(left: &Path, right: &Path, output: &Path, limit: usize) -> io::Result<()> {
+fn run(left: &Path, right: &Path, output: Option<&Path>, limit: usize) -> io::Result<()> {
     if limit == 0 {
         return Err(invalid("build-row budget must be positive"));
     }
     let parent = output
-        .parent()
+        .and_then(Path::parent)
         .filter(|p| !p.as_os_str().is_empty())
         .unwrap_or(Path::new("."));
-    if output.try_exists()? {
-        return Err(invalid("destination exists"));
+    if let Some(path) = output {
+        if path.try_exists()? {
+            return Err(invalid("destination exists"));
+        }
     }
     let dir = Scratch::new(parent)?;
     let load = |input, name| -> io::Result<Part> {
@@ -232,19 +241,20 @@ fn run(left: &Path, right: &Path, output: &Path, limit: usize) -> io::Result<()>
     let l = load(left, "left")?;
     let r = load(right, "right")?;
     let temp = dir.0.join("result");
-    let file = OpenOptions::new()
-        .create_new(true)
-        .write(true)
-        .open(&temp)?;
+    let file = output
+        .map(|_| OpenOptions::new().create_new(true).write(true).open(&temp))
+        .transpose()?;
     let mut engine = Engine {
-        out: BufWriter::new(file),
+        out: file.map(BufWriter::new),
         limit,
         stats: Stats::default(),
     };
     engine.join(&l, &r, &dir.0, 0, false)?;
-    engine.out.flush()?;
-    // Publish only the fully written inode. Concurrent creators cannot overwrite each other.
-    fs::hard_link(temp, output)?;
+    if let (Some(writer), Some(path)) = (engine.out.as_mut(), output) {
+        writer.flush()?;
+        // Publish only the fully written inode. Concurrent creators cannot overwrite each other.
+        fs::hard_link(temp, path)?;
+    }
     let s = engine.stats;
     println!("{{\"left_rows\":{},\"right_rows\":{},\"output_rows\":{},\"peak_build_rows\":{},\"partition_passes\":{},\"fallback_pairs\":{},\"partition_bytes_written\":{},\"probe_rows_scanned\":{}}}", l.rows,r.rows,s.output,s.peak_rows,s.split_passes,s.fallback_pairs,s.spill_bytes,s.probe_rows);
     Ok(())
@@ -252,13 +262,16 @@ fn run(left: &Path, right: &Path, output: &Path, limit: usize) -> io::Result<()>
 fn main() {
     let args: Vec<_> = env::args_os().skip(1).collect();
     let res = match args.as_slice() {
+        [mode, l, r, n] if mode == "--count" => n.to_str().and_then(|v|v.parse().ok())
+            .ok_or_else(|| invalid("invalid budget"))
+            .and_then(|budget|run(Path::new(l),Path::new(r),None,budget)),
         [l, r, o, n] => n
             .to_str()
             .and_then(|v| v.parse().ok())
             .ok_or_else(|| invalid("invalid budget"))
-            .and_then(|budget| run(Path::new(l), Path::new(r), Path::new(o), budget)),
+            .and_then(|budget| run(Path::new(l), Path::new(r), Some(Path::new(o)), budget)),
         _ => Err(invalid(
-            "usage: spillway-join LEFT.tsv RIGHT.tsv NEW_OUTPUT.tsv BUILD_ROWS",
+            "usage: spillway-join LEFT.tsv RIGHT.tsv NEW_OUTPUT.tsv BUILD_ROWS | --count LEFT.tsv RIGHT.tsv BUILD_ROWS",
         )),
     };
     if let Err(e) = res {

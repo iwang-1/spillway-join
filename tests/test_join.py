@@ -42,3 +42,15 @@ class JoinTests(unittest.TestCase):
                 worker.communicate()
             self.assertEqual(sorted(w.returncode for w in workers), [0,1,1,1])
             self.assertEqual(out.read_text(),"1\t4\t7\n")
+
+    def test_count_skew_without_emitting_cartesian_product(self):
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            l,r = root/"l",root/"r"
+            l.write_text("1\t0\n"*40000 + "2\t3\n"*17)
+            r.write_text("1\t2\n"*30000 + "2\t9\n"*19)
+            metrics = json.loads(subprocess.check_output([BIN,"--count",l,r,"512"],cwd=root))
+            self.assertEqual(metrics["output_rows"], 40000*30000+17*19)
+            self.assertLessEqual(metrics["peak_build_rows"],512)
+            self.assertEqual(sorted(p.name for p in root.iterdir()), ["l","r"])
