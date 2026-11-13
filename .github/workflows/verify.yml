@@ -1,0 +1,14 @@
+name: Verify external join
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo fmt --check
+      - run: cargo clippy --locked -- -D warnings
+      - run: cargo build --release --locked
+      - run: python3 -m unittest discover -v
+      - run: python3 experiments/verify.py | diff -u experiments/results.json -
